@@ -1,36 +1,44 @@
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 import API from "../services/api";
+import { useNavigate } from "react-router-dom";
 
-export default function Cart(){
+export default function Cart() {
 
-  const {cart,increase,decrease,removeFromCart} =
-  useContext(CartContext);
+  const navigate = useNavigate();
+
+  const {
+    cart,
+    increase,
+    decrease,
+    removeFromCart,
+    clearCart
+  } = useContext(CartContext);
 
   const total = cart.reduce(
-    (sum,item)=> sum + item.price * item.quantity,
+    (sum, item) => sum + item.price * item.quantity,
     0
   );
 
   const checkout = async () => {
 
     const order = {
-      userId:1,
-      items:cart.map(item=>({
-        productId:item.id,
-        quantity:item.quantity
+      userId: 1,
+      items: cart.map(item => ({
+        productId: item.id,
+        quantity: item.quantity
       }))
     };
 
-    try{
+    try {
 
-      await API.post("/orders",order);
+      await API.post("/orders", order);
 
-      alert("Order placed successfully");
+      clearCart(); // clears cart after order
 
-      window.location="/";
+      navigate("/success"); // redirect to success page
 
-    }catch(err){
+    } catch (err) {
 
       alert("Order failed");
 
@@ -38,7 +46,7 @@ export default function Cart(){
 
   };
 
-  return(
+  return (
 
     <div className="max-w-5xl mx-auto p-8">
 
@@ -76,7 +84,7 @@ export default function Cart(){
           <div className="flex items-center gap-3">
 
             <button
-              onClick={()=>decrease(item.id)}
+              onClick={() => decrease(item.id)}
               className="bg-gray-200 px-3 py-1 rounded"
             >
               -
@@ -85,7 +93,7 @@ export default function Cart(){
             <span>{item.quantity}</span>
 
             <button
-              onClick={()=>increase(item.id)}
+              onClick={() => increase(item.id)}
               className="bg-gray-200 px-3 py-1 rounded"
             >
               +
@@ -94,14 +102,12 @@ export default function Cart(){
           </div>
 
           <div className="font-semibold">
-
             ₹{item.price * item.quantity}
-
           </div>
 
           <button
-            onClick={()=>removeFromCart(item.id)}
-            className="text-red-500"
+            onClick={() => removeFromCart(item.id)}
+            className="text-red-500 hover:text-red-700"
           >
             Remove
           </button>
@@ -124,7 +130,7 @@ export default function Cart(){
 
           <button
             onClick={checkout}
-            className="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600"
+            className="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600 transition"
           >
             Checkout
           </button>
